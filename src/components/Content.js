@@ -66,7 +66,7 @@ function Content({ convo }) {
     if (messages.length > 0) return;
 
     if (searchData.data.search.items.length < 1) {
-        return;
+        return; 
     }
 
     setMessages(searchData.data.search.items);
