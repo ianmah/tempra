@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { utils } from 'ethers'
 import omitDeep from 'omit-deep'
 import { create } from 'ipfs-http-client'
+import Message from './Message'
 import LitJsSdk from 'lit-js-sdk'
 import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION, CREATE_COMMENT_TYPED_DATA } from '../utils/queries'
 import { ButtonIcon } from './Button'
@@ -295,6 +296,7 @@ function Content({ profile, wallet, convo, lensHub }) {
           {messages.map((message) => {
                 return message
           })}
+          <Message />
           <TextArea
             value={description}
             placeholder="New message"
