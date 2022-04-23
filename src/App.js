@@ -1,14 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react'
+import './App.css'
+import ApolloProvider from './components/Apollo'
+import Wallet from './components/Wallet'
+import Login from './components/Login'
 
 function App() {
+  const [wallet, setWallet] = useState({})
+  const [authToken, setAuthToken] = useState(false);
+  const [contract, setContract] = useState({})
+
   return (
+    <ApolloProvider>
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
+        <Wallet wallet={wallet} setWallet={setWallet} setLensHub={setContract} authToken={authToken} />
+        <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} />
         <a
           className="App-link"
           href="https://reactjs.org"
@@ -19,6 +25,7 @@ function App() {
         </a>
       </header>
     </div>
+    </ApolloProvider>
   );
 }
 
