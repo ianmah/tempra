@@ -72,9 +72,7 @@ function Content({ profile, wallet, convo, lensHub }) {
       return pub.__typename === 'Post'
     })
 
-
-
-    if (filteredPosts) {
+    if (filteredPosts[0]) {
       getPub({
         variables: {
             request: {
