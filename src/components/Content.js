@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { PaperPlaneRight } from 'phosphor-react'
-import { CREATE_POST_TYPED_DATA } from '../utils/queries'
-import { useMutation } from '@apollo/client'
+import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION } from '../utils/queries'
+import { useMutation, useLazyQuery, gql } from '@apollo/client'
 import { v4 as uuidv4 } from 'uuid'
 import { utils } from 'ethers'
 import omitDeep from 'omit-deep'
@@ -58,15 +58,66 @@ const StyledButton = styled(ButtonIcon)`
 function Content({ profile, wallet, convo, lensHub }) {
   const [description, setDescription] = useState('')
   const [mutatePostTypedData, typedPostData] = useMutation(CREATE_POST_TYPED_DATA)
+  const [messages, setMessages] = useState([]);
+
+  const [searchPost, searchPostData] = useLazyQuery(SEARCH);
+  const [getPub, getPubData] = useLazyQuery(GET_PUBLICATION);
+
+  useEffect(() => {
+    if (!searchPostData.data) return;
+    console.log(searchPostData.data.search.items[0])
+    if (searchPostData.data.search.items[0]) {
+      getPub({
+        variables: {
+            request: {
+                publicationId: searchPostData.data.search.items[0].id
+            },
+        },
+      })
+    }
+    if (messages.length > 0) return;
+
+    if (searchPostData.data.search.items.length < 1) {
+        return; 
+    }
+
+    setMessages(searchPostData.data.search.items);
+  }, [searchPostData.data]);
+
+  useEffect(() => {
+    if (!getPubData.data) return;
+    console.log(getPubData.data)
+
+  }, [getPubData.data]);
+
+  useEffect(() => {
+    if (!convo.handle) return;
+
+    const id = profile.id.replace('0x', '')
+    const users = [profile.handle, convo.handle]
+    users.sort()
+    const query = `#${users.join('')}tmpr`
+    
+    searchPost({
+        variables: {
+            request: {
+                query: query,
+                type: "PUBLICATION",
+            },
+        },
+      })
+  }, [convo.handle] )
 
   const handleSubmit = async () => {
     if (!description) return;
     const id = profile.id.replace('0x', '')
-    console.log({ id, description })
-
     const users = [profile.handle, convo.handle]
     users.sort()
-    const taggedDescription = `${description} #${users.join('')}tmpr`
+    const query = `#${users.join('')}tmpr`
+    
+    console.log({ id, description })
+
+    const taggedDescription = `${description} ${query}`
     console.log(taggedDescription)
 
     const ipfsResult = await client.add(JSON.stringify({
@@ -156,6 +207,9 @@ function Content({ profile, wallet, convo, lensHub }) {
       {convo.handle ? 
         <>
           <h2>{convo.handle}</h2>
+          {messages.map((message) => {
+                return message.id
+          })}
           content
           <TextArea
             value={description}

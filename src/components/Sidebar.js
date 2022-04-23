@@ -41,7 +41,6 @@ function Sidebar({ wallet, setConvo }) {
             <Compose/>
             {
                 profiles.map((item) => {
-                    console.log(item.profile)
                     return <ProfileContainer key={item.profile.id} onClick={() => setConvo(item.profile)} >
                         <ProfileIcon src={item.profile.picture.original.url} />
                         <p>{item.profile.handle}</p>
