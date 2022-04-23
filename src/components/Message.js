@@ -1,5 +1,7 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled from 'styled-components'
+import LitJsSdk from 'lit-js-sdk'
+import { create } from 'ipfs-http-client'
 
 const Wrapper = styled.div`
     display: flex;
@@ -65,11 +67,58 @@ const MessageBubbleThem = styled.div`
     }
 `
 
-function Message({ messages, selfHandle, post }) {
-    console.log(messages)
+const client = create('https://ipfs.infura.io:5001/api/v0')
+const chain = 'mumbai'
+
+function Message({ messages, selfHandle, walletAddress }) {
+    console.log(walletAddress)
     return (
         <Wrapper>
             { messages.map(msg => {
+                if (msg.encoded) {
+                    const encryptedPost = JSON.parse(msg.content);
+
+                    const accessControlConditions = [
+                        {
+                            contractAddress: '',
+                            standardContractType: '',
+                            chain,
+                            method: '',
+                            parameters: [
+                                ':userAddress'
+                            ],
+                            returnValueTest: {
+                                comparator: '=',
+                                value: walletAddress
+                            },
+                        },
+                    ];
+
+                    const isthisblob = client.cat(encryptedPost.blobPath);
+                    let newEcnrypt;
+                    const doThing = async () => {
+                        const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
+        
+                        for await (const chunk of isthisblob) {
+                            newEcnrypt = new Blob([chunk], {
+                                type: "encryptedString.type", // or whatever your Content-Type is
+                            });
+                        }
+                        const key = await window.litNodeClient.getEncryptionKey({
+                            accessControlConditions,
+                            // Note, below we convert the encryptedSymmetricKey from a UInt8Array to a hex string.  This is because we obtained the encryptedSymmetricKey from "saveEncryptionKey" which returns a UInt8Array.  But the getEncryptionKey method expects a hex string.
+                            toDecrypt: encryptedPost.key,
+                            chain,
+                            authSig,
+                        });
+        
+                        const decryptedString = await LitJsSdk.decryptString(newEcnrypt, key);
+        
+                        msg.content = decryptedString;
+                    }
+                    doThing();
+                    
+                }
                 if (msg.from === selfHandle) {
                     return <MessageBubbleSelf key={msg.createdAt}>
                         <p>{msg.content}</p>

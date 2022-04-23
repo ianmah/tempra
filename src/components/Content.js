@@ -107,6 +107,8 @@ function Content({ profile, wallet, convo, lensHub }) {
     setMessages([{
       from: getPubData.data.publication.profile.handle,
       content: firstMsg,
+      createdAt: getPubData.data.publication.createdAt,
+      encoded: getPubData.data.publication.metadata.description === 'litcoded}',
     }])
 
     getPubs({
@@ -124,12 +126,16 @@ function Content({ profile, wallet, convo, lensHub }) {
     if (!getPubsData.data) return;
 
     if (!getPubsData.data.publications.items) return;
+    const users = [profile.handle, convo.handle]
+    users.sort()
+    const query = `#${users.join('')}tmpr`
     const commentContents = getPubsData.data.publications.items.map(comment => {
       // console.log(comment)
       return {
         from: comment.profile.handle,
-        content: comment.metadata.content,
+        content: comment.metadata.content.replace(query, ''),
         createdAt: comment.createdAt,
+        encoded: comment.metadata.description === 'litcoded}',
       }
     })
 
@@ -184,7 +190,7 @@ function Content({ profile, wallet, convo, lensHub }) {
             contractAddress: '',
             standardContractType: '',
             chain,
-            method: 'balanceOf',
+            method: '',
             parameters: [
                 ':userAddress',
             ],
@@ -194,6 +200,8 @@ function Content({ profile, wallet, convo, lensHub }) {
             }
         }
     ]
+
+    console.log(profile)
 
     const encryptedSymmetricKey = await window.litNodeClient.saveEncryptionKey({
         accessControlConditions,
@@ -388,7 +396,7 @@ function Content({ profile, wallet, convo, lensHub }) {
           {/* {messages.map((message) => {
                 return message
           })} */}
-          <Message selfHandle={profile.handle} messages={messages} />
+          <Message selfHandle={profile.handle} messages={messages} walletAddress={profile.ownedBy} />
           <TextArea
             value={description}
             placeholder="New message"
