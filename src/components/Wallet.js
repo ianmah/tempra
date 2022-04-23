@@ -48,7 +48,7 @@ function Wallet({ wallet, setWallet, authToken, setProfiles, setLensHub }) {
     };
     
     const web3Modal = new Web3Modal({
-      network: "polygonmumbai", // optional
+      network: "mumbai", // optional
       cacheProvider: true, // optional
       providerOptions // required
     });

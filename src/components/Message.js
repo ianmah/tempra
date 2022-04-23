@@ -65,18 +65,21 @@ const MessageBubbleThem = styled.div`
     }
 `
 
-function Message({ side, post }) {
+function Message({ messages, selfHandle, post }) {
+    console.log(messages)
     return (
         <Wrapper>
-            <MessageBubbleSelf>
-                <p>Vandy wake up</p>
-            </MessageBubbleSelf>
-            <MessageBubbleSelf>
-                <p>WAGMI WAGMI WAGMI</p>
-            </MessageBubbleSelf>
-            <MessageBubbleThem>
-                <p>wyd u up?</p>
-            </MessageBubbleThem>
+            { messages.map(msg => {
+                if (msg.from === selfHandle) {
+                    return <MessageBubbleSelf key={msg.createdAt}>
+                        <p>{msg.content}</p>
+                    </MessageBubbleSelf>
+                } else {
+                    return <MessageBubbleThem key={msg.createdAt}>
+                        <p>{msg.content}</p>
+                    </MessageBubbleThem>
+                }
+            })}
         </Wrapper>
         
     );

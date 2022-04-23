@@ -1,10 +1,18 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { NotePencil } from 'phosphor-react'
-import { ButtonIcon } from './Button'
+import Button, { ButtonIcon } from './Button'
 
 const Container = styled.div`
+    position: absolute;
+    bottom: 0;
+`
 
+const StyledButton = styled(Button)`
+    color: black;
+    display: flex;
+    align-items: center;
+    background-color: white;
 `
 
 const ProfileIcon = styled.img`
@@ -20,9 +28,9 @@ function Compose({  }) {
     
     return (
         <Container>
-            <ButtonIcon onClick={handleClick}>
-                <NotePencil size={32} color='white' />
-            </ButtonIcon>
+            <StyledButton onClick={handleClick}>
+            <NotePencil size={32} color='black' /> Start a new conversation
+            </StyledButton>
         </Container>
         
     );

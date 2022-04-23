@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { PaperPlaneRight } from 'phosphor-react'
-import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION } from '../utils/queries'
-import { useMutation, useLazyQuery, gql } from '@apollo/client'
+import { useMutation, useLazyQuery } from '@apollo/client'
 import { v4 as uuidv4 } from 'uuid'
 import { utils } from 'ethers'
 import omitDeep from 'omit-deep'
-import { ButtonIcon } from './Button'
 import { create } from 'ipfs-http-client'
 import Message from './Message'
+import LitJsSdk from 'lit-js-sdk'
+import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION, CREATE_COMMENT_TYPED_DATA, GET_PUBLICATIONS } from '../utils/queries'
+import { ButtonIcon } from './Button'
 
 const client = create('https://ipfs.infura.io:5001/api/v0')
+
+const chain = 'mumbai'
 
 const Container = styled.div`
   width: 600px;
@@ -59,19 +62,25 @@ const StyledButton = styled(ButtonIcon)`
 function Content({ profile, wallet, convo, lensHub }) {
   const [description, setDescription] = useState('')
   const [mutatePostTypedData, typedPostData] = useMutation(CREATE_POST_TYPED_DATA)
-  const [messages, setMessages] = useState([]);
+  const [mutateCommentTypedData, typedCommentData] = useMutation(CREATE_COMMENT_TYPED_DATA)
+  const [messages, setMessages] = useState([])
+  const [publicationId, setPublicationId] = useState('')
 
   const [searchPost, searchPostData] = useLazyQuery(SEARCH);
   const [getPub, getPubData] = useLazyQuery(GET_PUBLICATION);
+  const [getPubs, getPubsData] = useLazyQuery(GET_PUBLICATIONS);
 
   useEffect(() => {
     if (!searchPostData.data) return;
-    console.log(searchPostData.data.search.items[0])
-    if (searchPostData.data.search.items[0]) {
+    const filteredPosts = searchPostData.data.search.items.filter(pub => {
+      return pub.__typename === 'Post'
+    })
+
+    if (filteredPosts[0]) {
       getPub({
         variables: {
             request: {
-                publicationId: searchPostData.data.search.items[0].id
+                publicationId: filteredPosts[0].id
             },
         },
       })
@@ -86,20 +95,64 @@ function Content({ profile, wallet, convo, lensHub }) {
 
   useEffect(() => {
     if (!getPubData.data) return;
-    console.log(getPubData.data)
-
-    const firstMsg = getPubData.data.publication.metadata.content
-    console.log(firstMsg)
-
-  }, [getPubData.data]);
-
-  useEffect(() => {
-    if (!convo.handle) return;
-
-    const id = profile.id.replace('0x', '')
     const users = [profile.handle, convo.handle]
     users.sort()
     const query = `#${users.join('')}tmpr`
+
+    setPublicationId(getPubData.data.publication.id)
+
+    const firstMsg = getPubData.data.publication.metadata.content.replace(query, '')
+    console.log(firstMsg)
+
+    setMessages([{
+      from: getPubData.data.publication.profile.handle,
+      content: firstMsg,
+    }])
+
+    getPubs({
+      variables: {
+          request: {
+              commentsOf: getPubData.data.publication.id
+          },
+      },
+    })
+
+  }, [getPubData.data]);
+
+
+  useEffect(() => {
+    if (!getPubsData.data) return;
+
+    if (!getPubsData.data.publications.items) return;
+    const commentContents = getPubsData.data.publications.items.map(comment => {
+      // console.log(comment)
+      return {
+        from: comment.profile.handle,
+        content: comment.metadata.content,
+        createdAt: comment.createdAt,
+      }
+    })
+
+    console.log(commentContents)
+    setMessages([...messages, ...commentContents.reverse()])
+
+  }, [getPubsData.data]);
+
+  useEffect(() => {
+    if (!convo.handle) return;
+    setMessages([])
+
+    const users = [profile.handle, convo.handle]
+    users.sort()
+    const query = `#${users.join('')}tmpr`
+
+    getPub({
+      variables: {
+          request: {
+              publicationId: '123'
+          },
+      },
+    })
     
     searchPost({
         variables: {
@@ -120,13 +173,56 @@ function Content({ profile, wallet, convo, lensHub }) {
     
     console.log({ id, description })
 
-    const taggedDescription = `${description} ${query}`
-    console.log(taggedDescription)
+    const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
 
-    const ipfsResult = await client.add(JSON.stringify({
-        name: 'Tempra Conversation',
-        description: taggedDescription,
-        content: taggedDescription,
+    const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(
+        description
+    );
+
+    const accessControlConditions = [
+        {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'balanceOf',
+            parameters: [
+                ':userAddress',
+            ],
+            returnValueTest: {
+                comparator: '=',
+                value: convo.ownedBy
+            }
+        }
+    ]
+
+    const encryptedSymmetricKey = await window.litNodeClient.saveEncryptionKey({
+        accessControlConditions,
+        symmetricKey,
+        authSig,
+        chain,
+    });
+
+    const blobString = await encryptedString.text()
+    console.log(JSON.stringify(encryptedString))
+    console.log(encryptedString)
+    const newBlob = new Blob([blobString], {
+        type: encryptedString.type // or whatever your Content-Type is
+    });
+    console.log(newBlob)
+    console.log(LitJsSdk.uint8arrayToString(encryptedSymmetricKey, "base16"))
+
+    const ipfsResult = await client.add(encryptedString)
+
+
+    const encryptedPost = {
+        key: LitJsSdk.uint8arrayToString(encryptedSymmetricKey, "base16"),
+        blobPath: ipfsResult.path,
+    }
+
+    const postIpfsRes = await client.add(JSON.stringify({
+      name: 'Tempra Conversation',
+        description: `litcoded}`,
+        content: `${JSON.stringify(encryptedPost)} ${query}`,
         external_url: null,
         image: null,
         imageMimeType: null,
@@ -137,73 +233,152 @@ function Content({ profile, wallet, convo, lensHub }) {
         metadata_id: uuidv4(),
     }))
 
-    console.log(ipfsResult.path)
+    const taggedDescription = `${description} ${query}`
+    console.log(taggedDescription)
 
-    const createPostRequest = {
-        profileId: profile.id,
-        contentURI: 'ipfs://' + ipfsResult.path,
-        collectModule: {
-          revertCollectModule: true,
-        },
-        referenceModule: {
-            followerOnlyReferenceModule: false,
-        },
-    };
+    // const ipfsResult = await client.add(JSON.stringify({
+    //     name: 'Tempra Conversation',
+    //     description: taggedDescription,
+    //     content: taggedDescription,
+    //     external_url: null,
+    //     image: null,
+    //     imageMimeType: null,
+    //     version: "1.0.0",
+    //     appId: 'tempra',
+    //     attributes: [],
+    //     media: [],
+    //     metadata_id: uuidv4(),
+    // }))
 
-    mutatePostTypedData({
-        variables: {
-            request: createPostRequest,
-        }
-    })
+    console.log(postIpfsRes.path)
 
-    console.log('created tpyed post data req')
+    // we check if this is a new conversation or continuing one
+    if (messages.length > 0) {
+      // continue convo
+      console.log('continuing', publicationId)
+
+      const createCommentRequest = {
+          profileId: profile.id,
+          publicationId,
+          contentURI: 'ipfs://' + postIpfsRes.path,
+          collectModule: {
+            revertCollectModule: true,
+          },
+          referenceModule: {
+              followerOnlyReferenceModule: false,
+          },
+      };
+
+      mutateCommentTypedData({
+          variables: {
+              request: createCommentRequest,
+          }
+      })
+
+    } else {
+      // new convo
+      console.log('new')
+      const createPostRequest = {
+          profileId: profile.id,
+          contentURI: 'ipfs://' + ipfsResult.path,
+          collectModule: {
+            revertCollectModule: true,
+          },
+          referenceModule: {
+              followerOnlyReferenceModule: false,
+          },
+      };
+
+      mutatePostTypedData({
+          variables: {
+              request: createPostRequest,
+          }
+      })
+
+      console.log('created typed post data req')
+    }
 
   }
   useEffect(() => {
-
       if (!typedPostData.error) return;
-      
+
       console.log(typedPostData.error)
 
   }, [typedPostData.error])
 
   useEffect(() => {
-    console.log('process post')
-      if (!typedPostData.data) return;
-      console.log('process post 2'  )
+    if (!typedPostData.data) return;
 
-      const processPost = async () => {
+    const processPost = async () => {
 
-          const typedData = typedPostData.data.createPostTypedData.typedData
-          const { domain, types, value } = typedData
+        const typedData = typedPostData.data.createPostTypedData.typedData
+        const { domain, types, value } = typedData
 
-          const signature = await wallet.signer._signTypedData(
-              omitDeep(domain, '__typename'),
-              omitDeep(types, '__typename'),
-              omitDeep(value, '__typename')
-          )
+        const signature = await wallet.signer._signTypedData(
+            omitDeep(domain, '__typename'),
+            omitDeep(types, '__typename'),
+            omitDeep(value, '__typename')
+        )
 
-          const { v, r, s } = utils.splitSignature(signature);
+        const { v, r, s } = utils.splitSignature(signature);
 
-          const tx = await lensHub.postWithSig({
-              profileId: typedData.value.profileId,
-              contentURI: typedData.value.contentURI,
-              collectModule: typedData.value.collectModule,
-              collectModuleData: typedData.value.collectModuleData,
-              referenceModule: typedData.value.referenceModule,
-              referenceModuleData: typedData.value.referenceModuleData,
-              sig: {
-                  v,
-                  r,
-                  s,
-                  deadline: typedData.value.deadline,
-              },
-          });
-          console.log('create post: tx hash', tx.hash);
-      }
-      processPost()
+        const tx = await lensHub.postWithSig({
+            profileId: typedData.value.profileId,
+            contentURI: typedData.value.contentURI,
+            collectModule: typedData.value.collectModule,
+            collectModuleData: typedData.value.collectModuleData,
+            referenceModule: typedData.value.referenceModule,
+            referenceModuleData: typedData.value.referenceModuleData,
+            sig: {
+                v,
+                r,
+                s,
+                deadline: typedData.value.deadline,
+            },
+        });
+        console.log('create post: tx hash', tx.hash);
+    }
+    processPost()
 
   }, [typedPostData.data])
+
+  useEffect(() => {
+    if (!typedCommentData.data) return;
+
+    const processComment = async () => {
+
+        const typedData = typedCommentData.data.createCommentTypedData.typedData
+        const { domain, types, value } = typedData
+
+        const signature = await wallet.signer._signTypedData(
+            omitDeep(domain, '__typename'),
+            omitDeep(types, '__typename'),
+            omitDeep(value, '__typename')
+        )
+
+        const { v, r, s } = utils.splitSignature(signature);
+
+        const tx = await lensHub.commentWithSig({
+          profileId: typedData.value.profileId,
+          contentURI: typedData.value.contentURI,
+          profileIdPointed: typedData.value.profileIdPointed,
+          pubIdPointed: typedData.value.pubIdPointed,
+          collectModule: typedData.value.collectModule,
+          collectModuleData: typedData.value.collectModuleData,
+          referenceModule: typedData.value.referenceModule,
+          referenceModuleData: typedData.value.referenceModuleData,
+            sig: {
+                v,
+                r,
+                s,
+                deadline: typedData.value.deadline,
+            },
+        });
+        console.log('create post: tx hash', tx.hash);
+    }
+    processComment()
+
+  }, [typedCommentData.data])
     
   return (
     <Container>
@@ -211,10 +386,9 @@ function Content({ profile, wallet, convo, lensHub }) {
         <>
           <h2>{convo.handle}</h2>
           {/* {messages.map((message) => {
-                return message.id
+                return message
           })} */}
-          <Message />
-          
+          <Message selfHandle={profile.handle} messages={messages} />
           <TextArea
             value={description}
             placeholder="New message"
