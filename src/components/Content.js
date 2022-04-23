@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, createRef } from 'react'
 import styled from 'styled-components'
 import { PaperPlaneRight } from 'phosphor-react'
 import { useMutation, useLazyQuery } from '@apollo/client'
@@ -60,7 +60,8 @@ const StyledButton = styled(ButtonIcon)`
 `
 
 function Content({ profile, wallet, convo, lensHub }) {
-  const [description, setDescription] = useState('')
+  // const [description, setDescription] = useState('')
+  const inputRef = createRef();
   const [mutatePostTypedData, typedPostData] = useMutation(CREATE_POST_TYPED_DATA)
   const [mutateCommentTypedData, typedCommentData] = useMutation(CREATE_COMMENT_TYPED_DATA)
   const [messages, setMessages] = useState([])
@@ -70,17 +71,21 @@ function Content({ profile, wallet, convo, lensHub }) {
   const [getPub, getPubData] = useLazyQuery(GET_PUBLICATION);
   const [getPubs, getPubsData] = useLazyQuery(GET_PUBLICATIONS);
 
+  //STEP 2
   useEffect(() => {
+    console.log('fired step 2')
     if (!searchPostData.data) return;
     const filteredPosts = searchPostData.data.search.items.filter(pub => {
       return pub.__typename === 'Post'
     })
 
+    console.log(filteredPosts[filteredPosts.length-1])
+
     if (filteredPosts[0]) {
       getPub({
         variables: {
             request: {
-                publicationId: filteredPosts[0].id
+                publicationId: filteredPosts[filteredPosts.length-1].id
             },
         },
       })
@@ -93,7 +98,9 @@ function Content({ profile, wallet, convo, lensHub }) {
 
   }, [searchPostData.data]);
 
+  //STEP 3
   useEffect(() => {
+    console.log('fired step 3')
     if (!getPubData.data) return;
     const users = [profile.handle, convo.handle]
     users.sort()
@@ -107,8 +114,7 @@ function Content({ profile, wallet, convo, lensHub }) {
     setMessages([{
       from: getPubData.data.publication.profile.handle,
       content: firstMsg,
-      createdAt: getPubData.data.publication.createdAt,
-      encoded: getPubData.data.publication.metadata.description === 'litcoded}',
+      encoded: true,
     }])
 
     getPubs({
@@ -122,7 +128,9 @@ function Content({ profile, wallet, convo, lensHub }) {
   }, [getPubData.data]);
 
 
+  //STEP 4
   useEffect(() => {
+    console.log('fired step 4')
     if (!getPubsData.data) return;
 
     if (!getPubsData.data.publications.items) return;
@@ -135,7 +143,7 @@ function Content({ profile, wallet, convo, lensHub }) {
         from: comment.profile.handle,
         content: comment.metadata.content.replace(query, ''),
         createdAt: comment.createdAt,
-        encoded: comment.metadata.description === 'litcoded}',
+        encoded: true,
       }
     })
 
@@ -144,7 +152,9 @@ function Content({ profile, wallet, convo, lensHub }) {
 
   }, [getPubsData.data]);
 
+  //STEP 1
   useEffect(() => {
+    console.log('fired step 1')
     if (!convo.handle) return;
     setMessages([])
 
@@ -168,9 +178,11 @@ function Content({ profile, wallet, convo, lensHub }) {
             },
         },
       })
+
   }, [convo.handle] )
 
   const handleSubmit = async () => {
+    const description = inputRef.current.value
     if (!description) return;
     const id = profile.id.replace('0x', '')
     const users = [profile.handle, convo.handle]
@@ -201,8 +213,6 @@ function Content({ profile, wallet, convo, lensHub }) {
         }
     ]
 
-    console.log(profile)
-
     const encryptedSymmetricKey = await window.litNodeClient.saveEncryptionKey({
         accessControlConditions,
         symmetricKey,
@@ -228,7 +238,7 @@ function Content({ profile, wallet, convo, lensHub }) {
     }
 
     const postIpfsRes = await client.add(JSON.stringify({
-      name: 'Tempra Conversation',
+        name: 'Tempra Conversation',
         description: `litcoded}`,
         content: `${JSON.stringify(encryptedPost)} ${query}`,
         external_url: null,
@@ -288,7 +298,7 @@ function Content({ profile, wallet, convo, lensHub }) {
       console.log('new')
       const createPostRequest = {
           profileId: profile.id,
-          contentURI: 'ipfs://' + ipfsResult.path,
+          contentURI: 'ipfs://' + postIpfsRes.path,
           collectModule: {
             revertCollectModule: true,
           },
@@ -394,14 +404,16 @@ function Content({ profile, wallet, convo, lensHub }) {
         <>
           <h2>{convo.handle}</h2>
           {/* {messages.map((message) => {
-                return message
+            console.log('hi')
+                return message.content
           })} */}
-          <Message selfHandle={profile.handle} messages={messages} walletAddress={profile.ownedBy} />
+          <Message messages={messages} walletAddress={profile.ownedBy} />
+
           <TextArea
-            value={description}
+            ref={inputRef}
             placeholder="New message"
             height={5}
-            onChange={e => setDescription(e.target.value)}
+            // onChange={e => setDescription(e.target.value)}
             />
           <StyledButton onClick={handleSubmit}>
             <PaperPlaneRight size={24} color='white' />
