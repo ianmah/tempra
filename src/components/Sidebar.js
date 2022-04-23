@@ -15,7 +15,7 @@ const ProfileContainer = styled.div`
     align-items: center;
 `
 
-function Sidebar({ wallet }) {
+function Sidebar({ wallet, setConvo }) {
     const [getFollowing, getFollowingData] = useLazyQuery(GET_FOLLOWING); 
     const [profiles, setProfiles] = useState([])
 
@@ -42,7 +42,7 @@ function Sidebar({ wallet }) {
             {
                 profiles.map((item) => {
                     console.log(item.profile)
-                    return <ProfileContainer key={item.profile.id}>
+                    return <ProfileContainer key={item.profile.id} onClick={() => setConvo(item.profile)} >
                         <ProfileIcon src={item.profile.picture.original.url} />
                         <p>{item.profile.handle}</p>
                     </ProfileContainer>

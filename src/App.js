@@ -25,6 +25,7 @@ function App() {
   const [authToken, setAuthToken] = useState(false);
   const [contract, setContract] = useState({})
   const [profiles, setProfiles] = useState([])
+  const [convo, setConvo] = useState({})
 
   return (
     <ApolloProvider>
@@ -44,8 +45,8 @@ function App() {
               <ProfilePicker profiles={profiles} />
             </div>
             <Columns>
-              <Content/>
-              <Sidebar wallet={wallet} />
+              <Content convo={convo} />
+              <Sidebar wallet={wallet} setConvo={setConvo} />
             </Columns>
           </Container>
       </ThemeProvider>

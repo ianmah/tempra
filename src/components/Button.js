@@ -20,4 +20,10 @@ const Button = styled.button`
     }
 `;
 
+export const ButtonIcon = styled(Button)`
+    width: 50px;
+    padding: 0.4em 0.1em;
+`
+
+
 export default Button;
