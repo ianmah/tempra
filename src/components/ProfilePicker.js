@@ -1,11 +1,30 @@
 import React, { useState } from 'react'
+import styled from 'styled-components'
 
-function ProfilePicker({ wallet, authToken, setAuthToken }) {
+
+
+const Picker = styled.div`
+    float: right;
+`
+
+const ProfileIcon = styled.img`
+    height: 4em;
+    width: 4em;
+    border-radius: 2em;
+`
+
+function ProfilePicker({ profiles }) {
     
   return (
-    <>
-    picker
-    </>
+    <Picker>
+    {
+        profiles.map(profile => {
+            return <div key={profile.id}>
+                <ProfileIcon src={profile.picture.original.url} key={profile.id}/>
+            </div>
+        })
+    }
+    </Picker>
     
   );
 }
