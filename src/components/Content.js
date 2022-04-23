@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { PaperPlaneRight } from 'phosphor-react'
 import { ButtonIcon } from './Button'
+import { SEARCH_POST } from '../utils/queries'
 
 const Container = styled.div`
   width: 600px;
@@ -49,13 +50,36 @@ const StyledButton = styled(ButtonIcon)`
 
 function Content({ convo }) {
   const [description, setDescription] = useState('')
+  const [messages, setMessages] = useState([]);
+
+  const searchData = useQuery(SEARCH_POST, {
+    variables: {
+        request: {
+            query: "tempuraraavetmpr",
+            type: "PUBLICATION",
+        },
+    },
+  });
+
+  useEffect(() => {
+    if (!searchData.data) return;
+    if (messages.length > 0) return;
+
+    if (searchData.data.search.items.length < 1) {
+        return;
+    }
+
+    setMessages(searchData.data.search.items);
+  }, [searchData.data]);
     
   return (
     <Container>
       {convo.handle ? 
         <>
           <h2>{convo.handle}</h2>
-          content
+          {messages.map((message) => {
+                return message.id
+            })}
           <TextArea
             value={description}
             placeholder="New message"
