@@ -81,12 +81,14 @@ function Content({ profile, wallet, convo, lensHub }) {
         return; 
     }
 
-    setMessages(searchPostData.data.search.items);
   }, [searchPostData.data]);
 
   useEffect(() => {
     if (!getPubData.data) return;
     console.log(getPubData.data)
+
+    const firstMsg = getPubData.data.publication.metadata.content
+    console.log(firstMsg)
 
   }, [getPubData.data]);
 
