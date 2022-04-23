@@ -37,7 +37,7 @@ const TextArea = styled.textarea`
     resize: none;
     font-size: 1em;
     height: ${p => p.height || 3}em;
-    width: 640px;
+    width: 670px;
     padding-bottom: 1em;
     color: #000;
     transition: all 100ms ease-in-out;
@@ -50,7 +50,7 @@ const TextArea = styled.textarea`
 const StyledButton = styled(ButtonIcon)`
   position: absolute;
   bottom: 4.5em;
-  right: 2em;
+  right: 1.4em;
 `
 
 const chain = 'mumbai'

@@ -8,8 +8,8 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     font-size: 1rem;
-    max-width: 600px;
-    padding: 0.5rem 1.5rem;
+    max-width: 650px;
+    padding: 0.5rem 0.5rem;
 `
 
 const MessageBubbleSelf = styled.div`
