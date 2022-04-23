@@ -5,9 +5,14 @@ import { ButtonIcon } from './Button'
 
 const Container = styled.div`
   width: 600px;
+  height: 80vh;
+  position: relative;
 `
 
 const TextArea = styled.textarea`
+    position: absolute;
+    bottom: 0;
+    left: 0;
     border: none;
     border-radius: 6px;
     font-family: ${p => p.theme.font};
@@ -15,6 +20,7 @@ const TextArea = styled.textarea`
     outline: none;
     padding: 0.3em;
     margin-bottom: 0.4em;
+    padding-right: 4em;
   
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
@@ -35,6 +41,12 @@ const TextArea = styled.textarea`
     border: 1px solid #eee;
 `
 
+const StyledButton = styled(ButtonIcon)`
+  position: absolute;
+  bottom: 3.5em;
+  right: 0.5em;
+`
+
 function Content({ convo }) {
   const [description, setDescription] = useState('')
     
@@ -50,9 +62,9 @@ function Content({ convo }) {
             height={5}
             onChange={e => setDescription(e.target.value)}
             />
-          <ButtonIcon>
-            <PaperPlaneRight size={32} color='white' />
-          </ButtonIcon>
+          <StyledButton>
+            <PaperPlaneRight size={24} color='white' />
+          </StyledButton>
         </> : 'Select a conversation'
       }
       
