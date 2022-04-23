@@ -1,19 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { ethers } from 'ethers'
 import { useLazyQuery } from '@apollo/client'
 import { GET_PROFILES } from '../utils/queries'
 import LensHub from '../abi/LensHub.json'
 
-const Profile = ({ profile, currProfile, handleClick }) => {
-  return <div onClick={() => handleClick(profile)} selected={currProfile.id === profile.id}>
-    <b>@{profile.handle}</b>
-    <img/>
-  </div>
-}
-
-function Wallet({ wallet, setWallet, authToken, currProfile, setProfile, setLensHub }) {
+function Wallet({ wallet, setWallet, authToken, setProfiles, setLensHub }) {
   const [getProfiles, profiles] = useLazyQuery(GET_PROFILES)
-  const [openPicker, setPicker] = useState(false)
 
   useEffect(() => {
     if (!authToken || !wallet.address) return;
@@ -35,7 +27,7 @@ function Wallet({ wallet, setWallet, authToken, currProfile, setProfile, setLens
     if (!profiles.data) return
     console.log(profiles.data.profiles.items)
 
-    // setProfile(profiles.data.profiles.items[0])
+    setProfiles(profiles.data.profiles.items)
 
   }, [profiles.data])
 
