@@ -18,6 +18,7 @@ const Container = styled.div`
 
 function Content({ profile, wallet, convo, lensHub }) {
   const [messages, setMessages] = useState([])
+  const [firstPost, setFirstPost] = useState({})
   const [publicationId, setPublicationId] = useState('')
 
   const [searchPost, searchPostData] = useLazyQuery(SEARCH);
@@ -64,11 +65,17 @@ function Content({ profile, wallet, convo, lensHub }) {
     const firstMsg = getPubData.data.publication.metadata.content.replace(query, '')
     console.log(firstMsg)
 
-    setMessages([{
-      from: getPubData.data.publication.profile.handle,
-      content: firstMsg,
-      encoded: true,
-    }])
+    // setMessages([{
+    //   from: getPubData.data.publication.profile.handle,
+    //   content: firstMsg,
+    //   encoded: true,
+    // }])
+
+    setFirstPost({
+        from: getPubData.data.publication.profile.handle,
+        content: firstMsg,
+        encoded: true,
+    })
 
     getPubs({
       variables: {
@@ -101,7 +108,7 @@ function Content({ profile, wallet, convo, lensHub }) {
     })
 
     console.log(commentContents)
-    setMessages([...messages, ...commentContents.reverse()])
+    setMessages([firstPost, ...commentContents.reverse()])
 
   }, [getPubsData.data]);
 

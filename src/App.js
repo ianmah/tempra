@@ -9,6 +9,7 @@ import GlobalStyle from './components/GlobalStyle'
 import ProfilePicker from './components/ProfilePicker'
 import Content from './components/Content'
 import Sidebar from './components/Sidebar'
+import Stories from './components/Stories'
 
 const Container = styled.div`
   max-width: 1000px;
@@ -35,6 +36,7 @@ function App() {
           });
           await client.connect();
           window.litNodeClient = client;
+          window.authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: 'mumbai' });
       };
       initLit();
   }, []);
@@ -53,7 +55,10 @@ function App() {
               />
             <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
             <Columns>
-              <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
+              <div>
+                <Stories profile={profiles[0]} />
+                <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
+              </div>
               <Sidebar wallet={wallet} setConvo={setConvo}>
                 <ProfilePicker profiles={profiles} />
               </Sidebar>

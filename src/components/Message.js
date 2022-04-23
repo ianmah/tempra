@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import LitJsSdk from 'lit-js-sdk'
 import { create } from 'ipfs-http-client'
 import { v4 as uuidv4 } from 'uuid'
-
+ 
 const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
@@ -11,7 +11,7 @@ const Wrapper = styled.div`
     max-width: 650px;
     padding: 0.5rem 0.5rem;
 `
-
+ 
 const MessageBubbleSelf = styled.div`
     display: flex;
     border-radius: 1.15rem;
@@ -39,7 +39,7 @@ const MessageBubbleSelf = styled.div`
         width: 10px;
     }
 `
-
+ 
 const MessageBubbleThem = styled.div`
     display: flex;
     border-radius: 1.15rem;
@@ -67,19 +67,50 @@ const MessageBubbleThem = styled.div`
         width: 10px;
     }
 `
-
+ 
 const client = create('https://ipfs.infura.io:5001/api/v0')
 const chain = 'mumbai'
-
-
+ 
+ 
 function Message ({ msg, walletAddress, senderAddress, selfHandle }) {
     const [txt, setTxt] = useState('')
     console.log({walletAddress, senderAddress})
-
+ 
     if (msg.encoded) {
         const encryptedPost = JSON.parse(msg.content);
-
-        const accessControlConditions = [
+ 
+ 
+        const accessControlConditions =  (msg.from === selfHandle) ?
+         [
+            {
+                contractAddress: '',
+                standardContractType: '',
+                chain,
+                method: '',
+                parameters: [
+                    ':userAddress'
+                ],
+                returnValueTest: {
+                    comparator: '=',
+                    value: senderAddress
+                },
+            },
+            {"operator": "or"},
+            {
+                contractAddress: '',
+                standardContractType: '',
+                chain,
+                method: '',
+                parameters: [
+                    ':userAddress',
+                ],
+                returnValueTest: {
+                    comparator: '=',
+                    value: walletAddress
+                }
+            }
+        ] :
+        [
             {
                 contractAddress: '',
                 standardContractType: '',
@@ -108,12 +139,12 @@ function Message ({ msg, walletAddress, senderAddress, selfHandle }) {
                 }
             }
         ];
-
+ 
         const isthisblob = client.cat(encryptedPost.blobPath);
         let newEcnrypt;
         const doThing = async () => {
             const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
-
+ 
             for await (const chunk of isthisblob) {
                 newEcnrypt = new Blob([chunk], {
                     type: "encryptedString.type", // or whatever your Content-Type is
@@ -126,19 +157,19 @@ function Message ({ msg, walletAddress, senderAddress, selfHandle }) {
                 chain,
                 authSig,
             });
-
+ 
             try {
                 const decryptedString = await LitJsSdk.decryptString(newEcnrypt, key);
                 setTxt(decryptedString);
             } catch (err) {
                 console.log(err)
             }
-
+ 
         }
-        doThing() 
+        doThing()
         console.log('did thing')
     }
-
+ 
     if (msg.from === selfHandle) {
         return (
             <MessageBubbleSelf>
@@ -146,22 +177,22 @@ function Message ({ msg, walletAddress, senderAddress, selfHandle }) {
             </MessageBubbleSelf>
         )
     }
-
+ 
     return (
         <MessageBubbleThem>
             <p>{txt || msg.content}</p>
         </MessageBubbleThem>
     )
-
+ 
 }
-
+ 
 function Messages({ messages, selfHandle, walletAddress, senderAddress }) {
     return (
         <Wrapper>
             { messages.map(msg => {
-                    
+                   
                 return <Message selfHandle={selfHandle} walletAddress={walletAddress} key={uuidv4()} msg={msg} senderAddress={senderAddress} />
-
+ 
                 // if (msg.from === selfHandle) {
                 //     return <MessageBubbleSelf key={msg.createdAt}>
                 //         <p>{msg.content}</p>
@@ -173,8 +204,8 @@ function Messages({ messages, selfHandle, walletAddress, senderAddress }) {
                 // }
             })}
         </Wrapper>
-        
+       
     );
 };
-
+ 
 export default Messages;
