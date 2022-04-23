@@ -84,21 +84,36 @@ function Content({ profile, wallet, convo, lensHub }) {
   }, [searchPostData.data]);
 
   useEffect(() => {
+    console.log('hiii')
     if (!getPubData.data) return;
+    const users = [profile.handle, convo.handle]
+    users.sort()
+    const query = `#${users.join('')}tmpr`
     console.log(getPubData.data)
 
-    const firstMsg = getPubData.data.publication.metadata.content
+    const firstMsg = getPubData.data.publication.metadata.content.replace(query, '')
     console.log(firstMsg)
+
+    setMessages([firstMsg])
 
   }, [getPubData.data]);
 
   useEffect(() => {
     if (!convo.handle) return;
+    setMessages([])
 
     const id = profile.id.replace('0x', '')
     const users = [profile.handle, convo.handle]
     users.sort()
     const query = `#${users.join('')}tmpr`
+
+    getPub({
+      variables: {
+          request: {
+              publicationId: '123'
+          },
+      },
+    })
     
     searchPost({
         variables: {
@@ -210,9 +225,8 @@ function Content({ profile, wallet, convo, lensHub }) {
         <>
           <h2>{convo.handle}</h2>
           {messages.map((message) => {
-                return message.id
+                return message
           })}
-          content
           <TextArea
             value={description}
             placeholder="New message"

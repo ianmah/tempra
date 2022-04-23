@@ -1,10 +1,7 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 
-
-
 const Picker = styled.div`
-    float: right;
 `
 
 export const ProfileIcon = styled.img`

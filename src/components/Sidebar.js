@@ -8,6 +8,7 @@ import { ProfileIcon } from './ProfilePicker'
 const Wrapper = styled.div`
     width: 300px;
     background: #fafafa;
+    position: relative;
 `
 
 const ProfileContainer = styled.div`
@@ -15,7 +16,7 @@ const ProfileContainer = styled.div`
     align-items: center;
 `
 
-function Sidebar({ wallet, setConvo }) {
+function Sidebar({ children, wallet, setConvo }) {
     const [getFollowing, getFollowingData] = useLazyQuery(GET_FOLLOWING); 
     const [profiles, setProfiles] = useState([])
 
@@ -38,7 +39,7 @@ function Sidebar({ wallet, setConvo }) {
     
     return (
         <Wrapper>
-            <Compose/>
+            {children}
             {
                 profiles.map((item) => {
                     return <ProfileContainer key={item.profile.id} onClick={() => setConvo(item.profile)} >
@@ -47,6 +48,7 @@ function Sidebar({ wallet, setConvo }) {
                     </ProfileContainer>
                 })
             }
+            <Compose/>
         </Wrapper>
         
     );

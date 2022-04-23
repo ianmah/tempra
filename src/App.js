@@ -42,11 +42,12 @@ function App() {
             <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
             <div>
               <h1>Tempra</h1>
-              <ProfilePicker profiles={profiles} />
             </div>
             <Columns>
               <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
-              <Sidebar wallet={wallet} setConvo={setConvo} />
+              <Sidebar wallet={wallet} setConvo={setConvo}>
+                <ProfilePicker profiles={profiles} />
+              </Sidebar>
             </Columns>
           </Container>
       </ThemeProvider>
