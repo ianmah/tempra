@@ -39,13 +39,13 @@ function App() {
               authToken={authToken}
               setProfiles={setProfiles}
               />
-            <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} />
+            <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
             <div>
               <h1>Tempra</h1>
               <ProfilePicker profiles={profiles} />
             </div>
             <Columns>
-              <Content convo={convo} />
+              <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
               <Sidebar wallet={wallet} setConvo={setConvo} />
             </Columns>
           </Container>

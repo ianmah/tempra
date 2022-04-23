@@ -16,7 +16,7 @@ const AUTHENTICATION = gql`
  }
 `;
 
-function Login({ wallet, authToken, setAuthToken }) {
+function Login({ wallet, authToken, setAuthToken, setProfiles }) {
 const [getChallenge, challengeData] = useLazyQuery(GET_CHALLENGE)
 const [mutateAuth, authData] = useMutation(AUTHENTICATION)
 
@@ -35,6 +35,12 @@ const [mutateAuth, authData] = useMutation(AUTHENTICATION)
       },
     },
    })
+  }
+
+  const handleLogout = () => {
+      window.sessionStorage.removeItem('lensToken')
+      setAuthToken(false)
+      setProfiles([])
   }
 
   useEffect(() => {
@@ -73,7 +79,7 @@ const [mutateAuth, authData] = useMutation(AUTHENTICATION)
 
   return (
     <>
-    { !authToken && <button onClick={handleLogin}>
+    { authToken ? <button onClick={handleLogout}>Logout</button> : <button onClick={handleLogin}>
         Login To lens
     </button> }
     </>

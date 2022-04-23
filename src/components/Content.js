@@ -1,7 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { PaperPlaneRight } from 'phosphor-react'
+import { CREATE_POST_TYPED_DATA } from '../utils/queries'
+import { useMutation } from '@apollo/client'
+import { v4 as uuidv4 } from 'uuid'
+import { utils } from 'ethers'
+import omitDeep from 'omit-deep'
 import { ButtonIcon } from './Button'
+import { create } from 'ipfs-http-client'
+
+const client = create('https://ipfs.infura.io:5001/api/v0')
 
 const Container = styled.div`
   width: 600px;
@@ -47,8 +55,101 @@ const StyledButton = styled(ButtonIcon)`
   right: 0.5em;
 `
 
-function Content({ convo }) {
+function Content({ profile, wallet, convo, lensHub }) {
   const [description, setDescription] = useState('')
+  const [mutatePostTypedData, typedPostData] = useMutation(CREATE_POST_TYPED_DATA)
+
+  const handleSubmit = async () => {
+    if (!description) return;
+    const id = profile.id.replace('0x', '')
+    console.log({ id, description })
+
+    const users = [profile.handle, convo.handle]
+    users.sort()
+    const taggedDescription = `${description} #${users.join('')}tmpr`
+    console.log(taggedDescription)
+
+    const ipfsResult = await client.add(JSON.stringify({
+        name: 'Tempra Conversation',
+        description: taggedDescription,
+        content: taggedDescription,
+        external_url: null,
+        image: null,
+        imageMimeType: null,
+        version: "1.0.0",
+        appId: 'tempra',
+        attributes: [],
+        media: [],
+        metadata_id: uuidv4(),
+    }))
+
+    console.log(ipfsResult.path)
+
+    const createPostRequest = {
+        profileId: profile.id,
+        contentURI: 'ipfs://' + ipfsResult.path,
+        collectModule: {
+          revertCollectModule: true,
+        },
+        referenceModule: {
+            followerOnlyReferenceModule: false,
+        },
+    };
+
+    mutatePostTypedData({
+        variables: {
+            request: createPostRequest,
+        }
+    })
+
+    console.log('created tpyed post data req')
+
+  }
+  useEffect(() => {
+
+      if (!typedPostData.error) return;
+      
+      console.log(typedPostData.error)
+
+  }, [typedPostData.error])
+
+  useEffect(() => {
+    console.log('process post')
+      if (!typedPostData.data) return;
+      console.log('process post 2'  )
+
+      const processPost = async () => {
+
+          const typedData = typedPostData.data.createPostTypedData.typedData
+          const { domain, types, value } = typedData
+
+          const signature = await wallet.signer._signTypedData(
+              omitDeep(domain, '__typename'),
+              omitDeep(types, '__typename'),
+              omitDeep(value, '__typename')
+          )
+
+          const { v, r, s } = utils.splitSignature(signature);
+
+          const tx = await lensHub.postWithSig({
+              profileId: typedData.value.profileId,
+              contentURI: typedData.value.contentURI,
+              collectModule: typedData.value.collectModule,
+              collectModuleData: typedData.value.collectModuleData,
+              referenceModule: typedData.value.referenceModule,
+              referenceModuleData: typedData.value.referenceModuleData,
+              sig: {
+                  v,
+                  r,
+                  s,
+                  deadline: typedData.value.deadline,
+              },
+          });
+          console.log('create post: tx hash', tx.hash);
+      }
+      processPost()
+
+  }, [typedPostData.data])
     
   return (
     <Container>
@@ -62,7 +163,7 @@ function Content({ convo }) {
             height={5}
             onChange={e => setDescription(e.target.value)}
             />
-          <StyledButton>
+          <StyledButton onClick={handleSubmit}>
             <PaperPlaneRight size={24} color='white' />
           </StyledButton>
         </> : 'Select a conversation'
