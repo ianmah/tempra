@@ -7,7 +7,7 @@ const Picker = styled.div`
     float: right;
 `
 
-const ProfileIcon = styled.img`
+export const ProfileIcon = styled.img`
     height: 4em;
     width: 4em;
     border-radius: 2em;

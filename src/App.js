@@ -6,12 +6,18 @@ import Login from './components/Login'
 import ThemeProvider from './components/ThemeProvider'
 import GlobalStyle from './components/GlobalStyle'
 import ProfilePicker from './components/ProfilePicker'
+import Content from './components/Content'
+import Sidebar from './components/Sidebar'
 
 const Container = styled.div`
   max-width: 800px;
   margin: auto;
-  background: #fafafa;
   min-height: 100vh;
+`
+
+const Columns = styled.div`
+  display: flex;
+
 `
 
 function App() {
@@ -33,8 +39,14 @@ function App() {
               setProfiles={setProfiles}
               />
             <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} />
-            <h1>Tempra</h1>
-            <ProfilePicker profiles={profiles} />
+            <div>
+              <h1>Tempra</h1>
+              <ProfilePicker profiles={profiles} />
+            </div>
+            <Columns>
+              <Content/>
+              <Sidebar wallet={wallet} />
+            </Columns>
           </Container>
       </ThemeProvider>
     </ApolloProvider>
