@@ -40,9 +40,6 @@ function App() {
               setProfiles={setProfiles}
               />
             <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
-            <div>
-              <h1>Tempra</h1>
-            </div>
             <Columns>
               <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
               <Sidebar wallet={wallet} setConvo={setConvo}>

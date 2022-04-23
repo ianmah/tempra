@@ -7,13 +7,16 @@ import { ProfileIcon } from './ProfilePicker'
 
 const Wrapper = styled.div`
     width: 300px;
-    background: #fafafa;
+    background: #f9f9f9;
     position: relative;
+    border-radius: 1em;
 `
 
 const ProfileContainer = styled.div`
     display: flex;
     align-items: center;
+    border-bottom: 1px solid #e1e1e1;
+    padding: 10px;
 `
 
 function Sidebar({ children, wallet, setConvo }) {

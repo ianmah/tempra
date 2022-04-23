@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { PaperPlaneRight } from 'phosphor-react'
-import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION } from '../utils/queries'
 import { useMutation, useLazyQuery, gql } from '@apollo/client'
 import { v4 as uuidv4 } from 'uuid'
 import { utils } from 'ethers'
 import omitDeep from 'omit-deep'
-import { ButtonIcon } from './Button'
 import { create } from 'ipfs-http-client'
+import LitJsSdk from 'lit-js-sdk'
+import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION, CREATE_COMMENT_TYPED_DATA } from '../utils/queries'
+import { ButtonIcon } from './Button'
 
 const client = create('https://ipfs.infura.io:5001/api/v0')
 
@@ -58,19 +59,26 @@ const StyledButton = styled(ButtonIcon)`
 function Content({ profile, wallet, convo, lensHub }) {
   const [description, setDescription] = useState('')
   const [mutatePostTypedData, typedPostData] = useMutation(CREATE_POST_TYPED_DATA)
-  const [messages, setMessages] = useState([]);
+  const [mutateCommentTypedData, typedCommentData] = useMutation(CREATE_COMMENT_TYPED_DATA)
+  const [messages, setMessages] = useState([])
+  const [publicationId, setPublicationId] = useState('')
 
   const [searchPost, searchPostData] = useLazyQuery(SEARCH);
   const [getPub, getPubData] = useLazyQuery(GET_PUBLICATION);
 
   useEffect(() => {
     if (!searchPostData.data) return;
-    console.log(searchPostData.data.search.items[0])
-    if (searchPostData.data.search.items[0]) {
+    const filteredPosts = searchPostData.data.search.items.filter(pub => {
+      return pub.__typename === 'Post'
+    })
+
+
+
+    if (filteredPosts) {
       getPub({
         variables: {
             request: {
-                publicationId: searchPostData.data.search.items[0].id
+                publicationId: filteredPosts[0].id
             },
         },
       })
@@ -84,12 +92,13 @@ function Content({ profile, wallet, convo, lensHub }) {
   }, [searchPostData.data]);
 
   useEffect(() => {
-    console.log('hiii')
     if (!getPubData.data) return;
     const users = [profile.handle, convo.handle]
     users.sort()
     const query = `#${users.join('')}tmpr`
     console.log(getPubData.data)
+
+    setPublicationId(getPubData.data.publication.id)
 
     const firstMsg = getPubData.data.publication.metadata.content.replace(query, '')
     console.log(firstMsg)
@@ -102,7 +111,6 @@ function Content({ profile, wallet, convo, lensHub }) {
     if (!convo.handle) return;
     setMessages([])
 
-    const id = profile.id.replace('0x', '')
     const users = [profile.handle, convo.handle]
     users.sort()
     const query = `#${users.join('')}tmpr`
@@ -153,71 +161,133 @@ function Content({ profile, wallet, convo, lensHub }) {
 
     console.log(ipfsResult.path)
 
-    const createPostRequest = {
-        profileId: profile.id,
-        contentURI: 'ipfs://' + ipfsResult.path,
-        collectModule: {
-          revertCollectModule: true,
-        },
-        referenceModule: {
-            followerOnlyReferenceModule: false,
-        },
-    };
+    // we check if this is a new conversation or continuing one
+    if (messages.length > 0) {
+      // continue convo
+      console.log('continuing', publicationId)
 
-    mutatePostTypedData({
-        variables: {
-            request: createPostRequest,
-        }
-    })
+      const createCommentRequest = {
+          profileId: profile.id,
+          publicationId,
+          contentURI: 'ipfs://' + ipfsResult.path,
+          collectModule: {
+            revertCollectModule: true,
+          },
+          referenceModule: {
+              followerOnlyReferenceModule: false,
+          },
+      };
 
-    console.log('created tpyed post data req')
+      mutateCommentTypedData({
+          variables: {
+              request: createCommentRequest,
+          }
+      })
+
+    } else {
+      // new convo
+      console.log('new')
+      const createPostRequest = {
+          profileId: profile.id,
+          contentURI: 'ipfs://' + ipfsResult.path,
+          collectModule: {
+            revertCollectModule: true,
+          },
+          referenceModule: {
+              followerOnlyReferenceModule: false,
+          },
+      };
+
+      mutatePostTypedData({
+          variables: {
+              request: createPostRequest,
+          }
+      })
+
+      console.log('created typed post data req')
+    }
 
   }
   useEffect(() => {
-
       if (!typedPostData.error) return;
-      
+
       console.log(typedPostData.error)
 
   }, [typedPostData.error])
 
   useEffect(() => {
-    console.log('process post')
-      if (!typedPostData.data) return;
-      console.log('process post 2'  )
+    if (!typedPostData.data) return;
 
-      const processPost = async () => {
+    const processPost = async () => {
 
-          const typedData = typedPostData.data.createPostTypedData.typedData
-          const { domain, types, value } = typedData
+        const typedData = typedPostData.data.createPostTypedData.typedData
+        const { domain, types, value } = typedData
 
-          const signature = await wallet.signer._signTypedData(
-              omitDeep(domain, '__typename'),
-              omitDeep(types, '__typename'),
-              omitDeep(value, '__typename')
-          )
+        const signature = await wallet.signer._signTypedData(
+            omitDeep(domain, '__typename'),
+            omitDeep(types, '__typename'),
+            omitDeep(value, '__typename')
+        )
 
-          const { v, r, s } = utils.splitSignature(signature);
+        const { v, r, s } = utils.splitSignature(signature);
 
-          const tx = await lensHub.postWithSig({
-              profileId: typedData.value.profileId,
-              contentURI: typedData.value.contentURI,
-              collectModule: typedData.value.collectModule,
-              collectModuleData: typedData.value.collectModuleData,
-              referenceModule: typedData.value.referenceModule,
-              referenceModuleData: typedData.value.referenceModuleData,
-              sig: {
-                  v,
-                  r,
-                  s,
-                  deadline: typedData.value.deadline,
-              },
-          });
-          console.log('create post: tx hash', tx.hash);
-      }
-      processPost()
+        const tx = await lensHub.postWithSig({
+            profileId: typedData.value.profileId,
+            contentURI: typedData.value.contentURI,
+            collectModule: typedData.value.collectModule,
+            collectModuleData: typedData.value.collectModuleData,
+            referenceModule: typedData.value.referenceModule,
+            referenceModuleData: typedData.value.referenceModuleData,
+            sig: {
+                v,
+                r,
+                s,
+                deadline: typedData.value.deadline,
+            },
+        });
+        console.log('create post: tx hash', tx.hash);
+    }
+    processPost()
 
   }, [typedPostData.data])
+
+  useEffect(() => {
+    if (!typedCommentData.data) return;
+
+    const processComment = async () => {
+
+        const typedData = typedCommentData.data.createCommentTypedData.typedData
+        const { domain, types, value } = typedData
+
+        const signature = await wallet.signer._signTypedData(
+            omitDeep(domain, '__typename'),
+            omitDeep(types, '__typename'),
+            omitDeep(value, '__typename')
+        )
+
+        const { v, r, s } = utils.splitSignature(signature);
+
+        const tx = await lensHub.commentWithSig({
+          profileId: typedData.value.profileId,
+          contentURI: typedData.value.contentURI,
+          profileIdPointed: typedData.value.profileIdPointed,
+          pubIdPointed: typedData.value.pubIdPointed,
+          collectModule: typedData.value.collectModule,
+          collectModuleData: typedData.value.collectModuleData,
+          referenceModule: typedData.value.referenceModule,
+          referenceModuleData: typedData.value.referenceModuleData,
+            sig: {
+                v,
+                r,
+                s,
+                deadline: typedData.value.deadline,
+            },
+        });
+        console.log('create post: tx hash', tx.hash);
+    }
+    processComment()
+
+  }, [typedCommentData.data])
     
   return (
     <Container>
