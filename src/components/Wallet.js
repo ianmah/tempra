@@ -5,6 +5,7 @@ import { GET_PROFILES } from '../utils/queries'
 import LensHub from '../abi/LensHub.json'
 import Web3Modal from "web3modal";
 import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
+import WalletConnectProvider from "@walletconnect/web3-provider";
 
 function Wallet({ wallet, setWallet, authToken, setProfiles, setLensHub }) {
   const [getProfiles, profiles] = useLazyQuery(GET_PROFILES)
@@ -43,6 +44,12 @@ function Wallet({ wallet, setWallet, authToken, setProfiles, setLensHub }) {
           rpc: "", // Optional if `infuraId` is provided; otherwise it's required
           chainId: 1, // Optional. It defaults to 1 if not provided
           darkMode: false // Optional. Use dark theme, defaults to false
+        }
+      },
+      walletconnect: {
+        package: WalletConnectProvider, // required
+        options: {
+          infuraId: "872482339df04cbd8e9867db362e6cc4" // required
         }
       }
     };
