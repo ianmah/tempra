@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import LitJsSdk from 'lit-js-sdk'
 import ApolloProvider from './components/Apollo'
 import Wallet from './components/Wallet'
 import Login from './components/Login'
@@ -26,6 +27,17 @@ function App() {
   const [contract, setContract] = useState({})
   const [profiles, setProfiles] = useState([])
   const [convo, setConvo] = useState({})
+
+  useEffect(() => {
+      const initLit = async () => {
+          const client = new LitJsSdk.LitNodeClient({
+              alertWhenUnauthorized: false,
+          });
+          await client.connect();
+          window.litNodeClient = client;
+      };
+      initLit();
+  }, []);
 
   return (
     <ApolloProvider>
