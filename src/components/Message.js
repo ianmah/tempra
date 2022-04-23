@@ -85,13 +85,13 @@ function Message ({ msg, walletAddress}) {
                 chain,
                 method: '',
                 parameters: [
-                    ':userAddress'
+                    ':userAddress',
                 ],
                 returnValueTest: {
                     comparator: '=',
                     value: walletAddress
-                },
-            },
+                }
+            }
         ];
 
         const isthisblob = client.cat(encryptedPost.blobPath);
@@ -112,9 +112,13 @@ function Message ({ msg, walletAddress}) {
                 authSig,
             });
 
-            const decryptedString = await LitJsSdk.decryptString(newEcnrypt, key);
+            try {
+                const decryptedString = await LitJsSdk.decryptString(newEcnrypt, key);
+                setTxt(decryptedString);
+            } catch (err) {
+                console.log(err)
+            }
 
-            setTxt(decryptedString);
         }
         doThing() 
         console.log('did thing')
