@@ -56,7 +56,7 @@ function Wallet({ wallet, setWallet, authToken, setProfiles, setLensHub }) {
     
     const web3Modal = new Web3Modal({
       network: "mumbai", // optional
-      cacheProvider: true, // optional
+      cacheProvider: true, 
       providerOptions // required
     });
     const instance = await web3Modal.connect();
