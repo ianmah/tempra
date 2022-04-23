@@ -6,10 +6,11 @@ import Compose from './Compose'
 import { ProfileIcon } from './ProfilePicker'
 
 const Wrapper = styled.div`
-    width: 300px;
+    width: 320px;
     background: #f9f9f9;
     position: relative;
     border-radius: 1em;
+    box-shadow: 0px 2px 12px rgba(112, 111, 111, 0.3);
 `
 
 const ProfileContainer = styled.div`

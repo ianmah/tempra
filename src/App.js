@@ -11,7 +11,7 @@ import Content from './components/Content'
 import Sidebar from './components/Sidebar'
 
 const Container = styled.div`
-  max-width: 800px;
+  max-width: 1000px;
   margin: auto;
   min-height: 100vh;
 `

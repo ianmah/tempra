@@ -72,8 +72,9 @@ const client = create('https://ipfs.infura.io:5001/api/v0')
 const chain = 'mumbai'
 
 
-function Message ({ msg, walletAddress}) {
+function Message ({ msg, walletAddress, senderAddress, selfHandle }) {
     const [txt, setTxt] = useState('')
+    console.log({walletAddress, senderAddress})
 
     if (msg.encoded) {
         const encryptedPost = JSON.parse(msg.content);
@@ -85,11 +86,25 @@ function Message ({ msg, walletAddress}) {
                 chain,
                 method: '',
                 parameters: [
-                    ':userAddress',
+                    ':userAddress'
                 ],
                 returnValueTest: {
                     comparator: '=',
                     value: walletAddress
+                },
+            },
+            {"operator": "or"},
+            {
+                contractAddress: '',
+                standardContractType: '',
+                chain,
+                method: '',
+                parameters: [
+                    ':userAddress',
+                ],
+                returnValueTest: {
+                    comparator: '=',
+                    value: senderAddress
                 }
             }
         ];
@@ -124,18 +139,28 @@ function Message ({ msg, walletAddress}) {
         console.log('did thing')
     }
 
+    if (msg.from === selfHandle) {
+        return (
+            <MessageBubbleSelf>
+                <p>{txt || msg.content}</p>
+            </MessageBubbleSelf>
+        )
+    }
+
     return (
-        <p>{txt || msg.content}</p>
+        <MessageBubbleThem>
+            <p>{txt || msg.content}</p>
+        </MessageBubbleThem>
     )
 
 }
 
-function Messages({ messages, selfHandle, walletAddress }) {
+function Messages({ messages, selfHandle, walletAddress, senderAddress }) {
     return (
         <Wrapper>
             { messages.map(msg => {
                     
-                return <Message walletAddress={walletAddress} key={uuidv4()} msg={msg} />
+                return <Message selfHandle={selfHandle} walletAddress={walletAddress} key={uuidv4()} msg={msg} senderAddress={senderAddress} />
 
                 // if (msg.from === selfHandle) {
                 //     return <MessageBubbleSelf key={msg.createdAt}>
