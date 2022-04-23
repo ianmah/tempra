@@ -8,7 +8,7 @@ import Button, { ButtonIcon } from './Button'
 import LitJsSdk from 'lit-js-sdk'
 import { v4 as uuidv4 } from 'uuid'
 import { create } from 'ipfs-http-client'
-import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION, CREATE_COMMENT_TYPED_DATA, GET_PUBLICATIONS } from '../utils/queries'
+import { CREATE_POST_TYPED_DATA, CREATE_COMMENT_TYPED_DATA } from '../utils/queries'
 
 const client = create('https://ipfs.infura.io:5001/api/v0')
 const Container = styled.div`
@@ -17,8 +17,8 @@ const Container = styled.div`
 
 const TextArea = styled.textarea`
     position: absolute;
-    bottom: 0;
-    left: 0;
+    bottom: 1em;
+    left: 1em;
     border: none;
     border-radius: 6px;
     font-family: ${p => p.theme.font};
@@ -37,7 +37,7 @@ const TextArea = styled.textarea`
     resize: none;
     font-size: 1em;
     height: ${p => p.height || 3}em;
-    width: 100%;
+    width: 640px;
     padding-bottom: 1em;
     color: #000;
     transition: all 100ms ease-in-out;
@@ -49,8 +49,8 @@ const TextArea = styled.textarea`
 
 const StyledButton = styled(ButtonIcon)`
   position: absolute;
-  bottom: 3.5em;
-  right: 0.5em;
+  bottom: 4.5em;
+  right: 2em;
 `
 
 const chain = 'mumbai'

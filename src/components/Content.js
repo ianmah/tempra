@@ -1,18 +1,9 @@
-import React, { useState, useEffect, createRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { useMutation, useLazyQuery } from '@apollo/client'
-import { v4 as uuidv4 } from 'uuid'
-import { utils } from 'ethers'
-import omitDeep from 'omit-deep'
-import { create } from 'ipfs-http-client'
+import { useLazyQuery } from '@apollo/client'
 import Message from './Message'
-import LitJsSdk from 'lit-js-sdk'
 import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION, CREATE_COMMENT_TYPED_DATA, GET_PUBLICATIONS } from '../utils/queries'
 import TextBox from './TextBox'
-
-const client = create('https://ipfs.infura.io:5001/api/v0')
-
-const chain = 'mumbai'
 
 const Container = styled.div`
   width: 700px;
