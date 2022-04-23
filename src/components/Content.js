@@ -8,6 +8,7 @@ import { utils } from 'ethers'
 import omitDeep from 'omit-deep'
 import { ButtonIcon } from './Button'
 import { create } from 'ipfs-http-client'
+import Message from './Message'
 
 const client = create('https://ipfs.infura.io:5001/api/v0')
 
@@ -209,10 +210,11 @@ function Content({ profile, wallet, convo, lensHub }) {
       {convo.handle ? 
         <>
           <h2>{convo.handle}</h2>
-          {messages.map((message) => {
+          {/* {messages.map((message) => {
                 return message.id
-          })}
-          content
+          })} */}
+          <Message />
+          
           <TextArea
             value={description}
             placeholder="New message"
