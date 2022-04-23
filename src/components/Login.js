@@ -72,9 +72,12 @@ const [mutateAuth, authData] = useMutation(AUTHENTICATION)
   }, [])
 
   return (
-    <button onClick={handleLogin}>
+    <>
+    { !authToken && <button onClick={handleLogin}>
         Login To lens
-    </button>
+    </button> }
+    </>
+    
   );
 }
 
