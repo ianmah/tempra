@@ -15,7 +15,7 @@ import Stories from './components/Stories'
 import tempra from './assets/tempra.svg'
 
 const Container = styled.div`
-  max-width: 800px;
+  max-width: 1000px;
   margin: auto;
   min-height: 100vh;
 `
@@ -61,7 +61,7 @@ function App() {
             <Wallet wallet={wallet} setWallet={setWallet} setLensHub={setContract} authToken={authToken} setProfiles={setProfiles}/>
             <Columns>
               <div>
-                <Stories wallet={wallet} profile={profiles[0]} lensHub={contract} />
+                <Stories profile={profiles[0]} />
                 <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
               </div>
               <Sidebar wallet={wallet} setConvo={setConvo}>
