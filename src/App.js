@@ -9,9 +9,10 @@ import GlobalStyle from './components/GlobalStyle'
 import ProfilePicker from './components/ProfilePicker'
 import Content from './components/Content'
 import Sidebar from './components/Sidebar'
+import Stories from './components/Stories'
 
 const Container = styled.div`
-  max-width: 1000px;
+  max-width: 800px;
   margin: auto;
   min-height: 100vh;
 `
@@ -53,6 +54,7 @@ function App() {
               />
             <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
             <Columns>
+              <Stories wallet={wallet} profile={profiles[0]} lensHub={contract} />
               <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
               <Sidebar wallet={wallet} setConvo={setConvo}>
                 <ProfilePicker profiles={profiles} />
