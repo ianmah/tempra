@@ -11,6 +11,8 @@ import Content from './components/Content'
 import Sidebar from './components/Sidebar'
 import Stories from './components/Stories'
 
+import tempra from './assets/tempra.svg'
+
 const Container = styled.div`
   max-width: 1000px;
   margin: auto;
@@ -19,7 +21,11 @@ const Container = styled.div`
 
 const Columns = styled.div`
   display: flex;
+`
 
+const Nav = styled.div`
+  display: flex;
+  gap: 8px;
 `
 
 function App() {
@@ -45,25 +51,30 @@ function App() {
     <ApolloProvider>
       <ThemeProvider>
         <GlobalStyle/>
-          <Container>
-            <Wallet
-              wallet={wallet}
-              setWallet={setWallet}
-              setLensHub={setContract}
-              authToken={authToken}
-              setProfiles={setProfiles}
-              />
-            <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
-            <Columns>
-              <div>
-                <Stories profile={profiles[0]} />
-                <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
-              </div>
-              <Sidebar wallet={wallet} setConvo={setConvo}>
-                <ProfilePicker profiles={profiles} />
-              </Sidebar>
-            </Columns>
-          </Container>
+
+        <Container>
+          <Nav>
+            <img src={tempra} alt="tempra logos"/>
+            <h2>Tempra</h2>
+          </Nav>
+          <Wallet
+            wallet={wallet}
+            setWallet={setWallet}
+            setLensHub={setContract}
+            authToken={authToken}
+            setProfiles={setProfiles}
+            />
+          <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
+          <Columns>
+            <div>
+              <Stories profile={profiles[0]} />
+              <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
+            </div>
+            <Sidebar wallet={wallet} setConvo={setConvo}>
+              <ProfilePicker profiles={profiles} />
+            </Sidebar>
+          </Columns>
+        </Container>
       </ThemeProvider>
     </ApolloProvider>
   );

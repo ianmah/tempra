@@ -43,7 +43,7 @@ const TextArea = styled.textarea`
     color: #000;
     transition: all 100ms ease-in-out;
     &:focus {
-        background: #ECE8FF;
+        background: #fff;
     }
     border: 1px solid #eee;
 `

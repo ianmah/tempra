@@ -78,11 +78,11 @@ const [mutateAuth, authData] = useMutation(AUTHENTICATION)
   }, [])
 
   return (
-    <>
+    <div style={{ position: 'absolute', right: '0', bottom: '0' }}>
     { authToken ? <button onClick={handleLogout}>Logout</button> : <button onClick={handleLogin}>
         Login To lens
     </button> }
-    </>
+    </div>
     
   );
 }

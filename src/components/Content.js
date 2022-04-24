@@ -6,8 +6,8 @@ import { CREATE_POST_TYPED_DATA, SEARCH, GET_PUBLICATION, CREATE_COMMENT_TYPED_D
 import TextBox from './TextBox'
 
 const Container = styled.div`
-  width: 700px;
-  height: 90vh;
+  width: 660px;
+  height: 75vh;
   padding: 1em;
   background: #f9f9f9;
   position: relative;

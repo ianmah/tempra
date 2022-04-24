@@ -21,7 +21,7 @@ const MessageBubbleSelf = styled.div`
     position: relative;
     word-wrap: break-word;
     align-self: flex-end;
-    background-color: #7329F0;
+    background-color: #2561ED;
     color: #fff;
     margin: 0.25rem 0 0;
     width: fit-content;

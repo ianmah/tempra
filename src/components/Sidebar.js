@@ -18,6 +18,11 @@ const ProfileContainer = styled.div`
     align-items: center;
     border-bottom: 1px solid #e1e1e1;
     padding: 10px;
+    transition: all 150ms ease-in-out;
+    &:hover {
+        cursor: pointer;
+        background-color: rgba(255, 199, 73, 0.35);
+    }
 `
 
 function Sidebar({ children, wallet, setConvo }) {

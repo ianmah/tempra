@@ -47,6 +47,7 @@ export default createGlobalStyle`
   }
   body {
     margin: 0px;
+    margin-top: 0.2em;
     padding: 0px;
     font-family: ${p => p.theme.font};
     background: ${p => p.theme.background};

@@ -1,42 +1,81 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useQuery } from '@apollo/client'
-import Button, { ButtonIcon } from './Button'
+import { useLazyQuery } from '@apollo/client'
+import Modal from './Modal'
 import { GET_TIMELINE } from '../utils/queries'
 
 const Container = styled.div`
     height: 80px;
+    position: relative;
 `
 
 const ProfileIcon = styled.img`
     height: 4em;
     width: 4em;
-    border-radius: 2em;
-    border: 1px solid;
-    border-image-source: linear-gradient(189.15deg, #F6C005 0.58%, #F87383 49.27%, #726FFF 100%);
+    border-radius: 5em;
+    
+    border: 4px solid #E13F04;
 `
 
+const AddStory = styled.div`
+    width: 4em;
+    &:hover {
+        cursor: pointer;
+    }
+`
+
+const Add = styled.span`
+    position: absolute;
+    background: ${p => p.theme.gradient};
+    color: white;
+    font-weight: 500;
+    font-size: 12px;
+    border-radius: 60px;
+    bottom: 0.9em;
+    left: 4.2em;
+    padding: 0.2em 0.6em;
+`;
+
 function Stories({ profile = {} }) {
-    // const { loading, error, data } = useQuery(GET_TIMELINE, {
-    //     variables: {
-    //         request: {
-    //             profileId: profile.id,
-    //         },
-    //     },
-    // });
+    const [getTimeline, getTimelineData] = useLazyQuery(GET_TIMELINE)
+    const [modalOn, setModalOn] = useState(false)
 
-    // useEffect(() => {
+    useEffect(() => {
+        getTimeline({
+            variables: {
+                request: {
+                    profileId: profile.id,
+                },
+            }
+        })
+    }, [])
 
-    //     console.log(data.timeline.items.filter((post) => {
-    //         return post.metadata.description === 'ephemeraaal'
-    //     }))
+    useEffect(() => {
+        if (!getTimelineData.data) return;
+        console.log(getTimelineData.data.timeline.items.filter((post) => {
+            return post.metadata.description === 'ephemeraaal'
+        }))
+
+    }, [getTimelineData.data])
 
 
-    // }, [data])
-    
+    const handleAdd = () => {
+        setModalOn(true)
+    }
+
     return (
         <Container>
-            <ProfileIcon/>
+            { modalOn && <Modal onExit={() => setModalOn(false)}>
+                    hi!
+                </Modal>
+            }
+            {
+                profile.picture && <AddStory onClick={handleAdd} >
+                    <ProfileIcon src={profile.picture.original.url} />
+                    <Add>+</Add>
+                </AddStory>
+            }
+            
         </Container>
         
     );
