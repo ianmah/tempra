@@ -14,7 +14,7 @@ const client = create('https://ipfs.infura.io:5001/api/v0')
 const axios = require('axios');
 
 
-const Stories = ({ wallet, profile, lensHub }) => {
+const Stories = ({ wallet, profile = {}, lensHub }) => {
     const [mutatePostTypedData, typedPostData] = useMutation(CREATE_POST_TYPED_DATA)
 
     // Uploading Video
@@ -48,6 +48,7 @@ const Stories = ({ wallet, profile, lensHub }) => {
         console.log("VideoNFTMetaData :", vidNftData)
 
         setLoading(false)
+        handleSubmit()
 
         // console.log(data);
         // const ipfs = await fetch(`https://ipfs.io/${data.data.replace(":", "")}`);
