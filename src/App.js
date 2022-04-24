@@ -9,6 +9,7 @@ import GlobalStyle from './components/GlobalStyle'
 import ProfilePicker from './components/ProfilePicker'
 import Content from './components/Content'
 import Sidebar from './components/Sidebar'
+import Landing from './components/Landing'
 
 const Container = styled.div`
   max-width: 800px;
@@ -43,14 +44,7 @@ function App() {
     <ApolloProvider>
       <ThemeProvider>
         <GlobalStyle/>
-          <Container>
-            <Wallet
-              wallet={wallet}
-              setWallet={setWallet}
-              setLensHub={setContract}
-              authToken={authToken}
-              setProfiles={setProfiles}
-              />
+        {wallet.address ? <Container>
             <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
             <Columns>
               <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
@@ -58,7 +52,7 @@ function App() {
                 <ProfilePicker profiles={profiles} />
               </Sidebar>
             </Columns>
-          </Container>
+          </Container> : <Landing wallet={wallet} setWallet={setWallet} setLensHub={setContract} authToken={authToken} setProfiles={setProfiles}/>}
       </ThemeProvider>
     </ApolloProvider>
   );
