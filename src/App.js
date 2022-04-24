@@ -9,7 +9,10 @@ import GlobalStyle from './components/GlobalStyle'
 import ProfilePicker from './components/ProfilePicker'
 import Content from './components/Content'
 import Sidebar from './components/Sidebar'
+import Landing from './components/Landing'
 import Stories from './components/Stories'
+
+import tempra from './assets/tempra.svg'
 
 const Container = styled.div`
   max-width: 800px;
@@ -19,7 +22,11 @@ const Container = styled.div`
 
 const Columns = styled.div`
   display: flex;
+`
 
+const Nav = styled.div`
+  display: flex;
+  gap: 8px;
 `
 
 function App() {
@@ -36,6 +43,7 @@ function App() {
           });
           await client.connect();
           window.litNodeClient = client;
+          window.authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: 'mumbai' });
       };
       initLit();
   }, []);
@@ -44,23 +52,23 @@ function App() {
     <ApolloProvider>
       <ThemeProvider>
         <GlobalStyle/>
-          <Container>
-            <Wallet
-              wallet={wallet}
-              setWallet={setWallet}
-              setLensHub={setContract}
-              authToken={authToken}
-              setProfiles={setProfiles}
-              />
+        {wallet.address ? <Container>
+            <Nav>
+              <img src={tempra} alt="tempra logos"/>
+              <h2>Tempra</h2>
+            </Nav>
             <Login wallet={wallet} authToken={authToken} setAuthToken={setAuthToken} setProfiles={setProfiles} />
+            <Wallet wallet={wallet} setWallet={setWallet} setLensHub={setContract} authToken={authToken} setProfiles={setProfiles}/>
             <Columns>
-              <Stories wallet={wallet} profile={profiles[0]} lensHub={contract} />
-              <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
+              <div>
+                <Stories profile={profiles[0]} />
+                <Content convo={convo} profile={profiles[0]} wallet={wallet} lensHub={contract} />
+              </div>
               <Sidebar wallet={wallet} setConvo={setConvo}>
                 <ProfilePicker profiles={profiles} />
               </Sidebar>
             </Columns>
-          </Container>
+          </Container> : <Landing wallet={wallet} setWallet={setWallet} setLensHub={setContract} authToken={authToken} setProfiles={setProfiles}/>}
       </ThemeProvider>
     </ApolloProvider>
   );

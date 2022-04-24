@@ -6,9 +6,26 @@ import LensHub from '../abi/LensHub.json'
 import Web3Modal from "web3modal";
 import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import Button from './Button'
+import styled, { withTheme } from 'styled-components'
+
+
+
 
 function Wallet({ wallet, setWallet, authToken, setProfiles, setLensHub }) {
   const [getProfiles, profiles] = useLazyQuery(GET_PROFILES)
+  const ButtonIcon = styled(Button)`
+    width: 344px;
+    height: 46px;
+    padding: 10px 16px;
+    background: #000000;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.08);
+    border-radius: 3px;
+    color: white;
+    :hover {
+      background: black;
+    }
+    `
 
   useEffect(() => {
     if (!authToken || !wallet.address) return;
@@ -84,7 +101,7 @@ function Wallet({ wallet, setWallet, authToken, setProfiles, setLensHub }) {
     
     <div>
     { !wallet.signer
-    && <button onClick={connectWallet} >Connect Wallet</button>
+    && <ButtonIcon onClick={connectWallet} >Connect Wallet</ButtonIcon>
     }
   </div>
   );

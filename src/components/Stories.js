@@ -6,13 +6,45 @@ import omitDeep from 'omit-deep'
 import { v4 as uuidv4 } from 'uuid';
 import { create } from 'ipfs-http-client'
 import Button from './Button'
-import { CREATE_POST_TYPED_DATA } from '../utils/queries'
+import { CREATE_POST_TYPED_DATA, GET_TIMELINE } from '../utils/queries'
+import { useLazyQuery } from '@apollo/client'
+import Modal from './Modal'
 
 
 const client = create('https://ipfs.infura.io:5001/api/v0')
 
 const axios = require('axios');
 
+const Container = styled.div`
+    height: 80px;
+    position: relative;
+`
+
+const ProfileIcon = styled.img`
+    height: 4em;
+    width: 4em;
+    border-radius: 5em;
+    border: 4px solid #E13F04;
+`
+
+const AddStory = styled.div`
+    width: 4em;
+    &:hover {
+        cursor: pointer;
+    }
+`
+
+const Add = styled.span`
+    position: absolute;
+    background: ${p => p.theme.gradient};
+    color: white;
+    font-weight: 500;
+    font-size: 12px;
+    border-radius: 60px;
+    bottom: 0.9em;
+    left: 4.2em;
+    padding: 0.2em 0.6em;
+`;
 
 const Stories = ({ wallet, profile = {}, lensHub }) => {
     const [mutatePostTypedData, typedPostData] = useMutation(CREATE_POST_TYPED_DATA)
@@ -22,6 +54,32 @@ const Stories = ({ wallet, profile = {}, lensHub }) => {
     const [selectedFile, setSelectedFile] = useState("");
     const [video, setVideo] = useState("")
     const [videoNftMetadata, setVideoNftMetadata] = useState({})
+
+    const [getTimeline, getTimelineData] = useLazyQuery(GET_TIMELINE)
+    const [modalOn, setModalOn] = useState(false)
+
+    useEffect(() => {
+        getTimeline({
+            variables: {
+                request: {
+                    profileId: profile.id,
+                },
+            }
+        })
+    }, [])
+
+    useEffect(() => {
+        if (!getTimelineData.data) return;
+        console.log(getTimelineData.data.timeline.items.filter((post) => {
+            return post.metadata.description === 'ephemeraaal'
+        }))
+
+    }, [getTimelineData.data])
+
+
+    const handleAdd = () => {
+        setModalOn(true)
+    }
 
     const videoUpload = async () => {
         const formData = new FormData();
@@ -158,13 +216,22 @@ const Stories = ({ wallet, profile = {}, lensHub }) => {
     }, [typedPostData.data])
 
     return (
-        <div>
-            <input
-                type="file"
-                onChange={(e) => setSelectedFile(e.target.files[0])}
-            />
-            <Button onClick={videoUpload}>Upload Story</Button>
-        </div>
+        <Container>
+            { modalOn && <Modal onExit={() => setModalOn(false)}>
+                    <input
+                        type="file"
+                        onChange={(e) => setSelectedFile(e.target.files[0])}
+                    />
+                    <Button onClick={videoUpload}>Upload Story</Button>
+                </Modal>
+            }
+            {
+                profile.picture && <AddStory onClick={handleAdd} >
+                    <ProfileIcon src={profile.picture.original.url} />
+                    <Add>+</Add>
+                </AddStory>
+            }
+        </Container>
     )
 }
 
