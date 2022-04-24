@@ -180,13 +180,6 @@ const Stories = ({ wallet, profile = {}, lensHub }) => {
     }
 
     useEffect(() => {
-        if (!typedPostData.error) return;
- 
-        console.log(typedPostData.error)
- 
-    }, [typedPostData.error])
-
-    useEffect(() => {
         if (!typedPostData.data) return;
 
         const processPost = async () => {
