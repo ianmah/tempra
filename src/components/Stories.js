@@ -123,15 +123,15 @@ const Stories = ({ wallet, profile = {}, lensHub }) => {
 
         if (videoNftMetadata) {
             ipfsResult = await client.add(JSON.stringify({
-                name: videoNftMetadata["name"],
-                description : "story",
+                name: 'Tempra story',
+                description : "ephemeraaal",
                 content: "story",
                 external_url: null,
                 // image: null,
                 image: videoNftMetadata["image"],
                 imageMimeType: null,
                 version: "1.0.0",
-                appId: 'iris',
+                appId: 'tempra',
                 attributes: [],
                 media: [{
                     item: videoNftMetadata["animation_url"],
@@ -149,7 +149,7 @@ const Stories = ({ wallet, profile = {}, lensHub }) => {
             //     image: "ipfs://bafkreidmlgpjoxgvefhid2xjyqjnpmjjmq47yyrcm6ifvoovclty7sm4wm",
             //     imageMimeType: null,
             //     version: "1.0.0",
-            //     appId: 'iris',
+            //     appId: 'tempra',
             //     attributes: [],
             //     media: [{
             //         item: "ipfs://QmPUwFjbapev1rrppANs17APcpj8YmgU5ThT1FzagHBxm7",
@@ -178,6 +178,13 @@ const Stories = ({ wallet, profile = {}, lensHub }) => {
             }
         })
     }
+
+    useEffect(() => {
+        if (!typedPostData.error) return;
+ 
+        console.log(typedPostData.error)
+ 
+    }, [typedPostData.error])
 
     useEffect(() => {
         if (!typedPostData.data) return;
