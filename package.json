@@ -9,13 +9,10 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "@walletconnect/web3-provider": "^1.7.7",
-    "@livepeer/video-nft": "^0.3.4",
-    "axios": "^0.26.1",
     "ethers": "^5.6.4",
     "graphql": "^16.3.0",
     "ipfs-http-client": "^56.0.2",
     "lit-js-sdk": "^1.1.167",
-    "multer": "^1.4.4",
     "omit-deep": "^0.3.0",
     "phosphor-react": "^1.4.1",
     "react": "^17.0.2",
@@ -23,10 +20,7 @@
     "react-scripts": "4.0.3",
     "styled-components": "^5.3.5",
     "web-vitals": "^2.1.4",
-    "web3modal": "^1.9.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.0",
-    "express": "^4.17.3"
+    "web3modal": "^1.9.7"
   },
   "scripts": {
     "start": "react-scripts start",
